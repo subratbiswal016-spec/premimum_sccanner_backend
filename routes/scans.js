@@ -53,6 +53,17 @@ router.get('/duplicates/:moduleId', auth, async (req, res) => {
   }
 });
 
+// GET /api/scans/exists/:moduleId — Check if a module ID already exists in the database
+router.get('/exists/:moduleId', auth, async (req, res) => {
+  try {
+    const count = await Scan.countDocuments({ moduleId: req.params.moduleId });
+    res.json({ exists: count > 0 });
+  } catch (error) {
+    console.error('Exists check error:', error);
+    res.status(500).json({ message: 'Server error checking existence.' });
+  }
+});
+
 // POST /api/scans — Create a new scan record
 router.post('/', auth, async (req, res) => {
   try {
