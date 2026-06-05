@@ -4,12 +4,20 @@ const { auth, isAdmin } = require('../middleware/auth');
 
 const router = express.Router();
 
+// Helper: build adminId filter based on user role
+function getAdminFilter(user, userId) {
+  if (user.role === 'super_admin') return {};
+  if (user.role === 'admin') return { adminId: userId };
+  // user role
+  return { adminId: user.createdBy };
+}
+
 // GET /api/scans — Get all scans (with optional filters)
 // Query params: date, search, startDate, endDate
 router.get('/', auth, async (req, res) => {
   try {
     const { date, search, startDate, endDate } = req.query;
-    let query = {};
+    let query = { ...getAdminFilter(req.user, req.userId) };
 
     if (date) {
       query.date = date;
@@ -34,7 +42,8 @@ router.get('/', auth, async (req, res) => {
 // GET /api/scans/dates — Get all distinct dates that have scan data
 router.get('/dates', auth, async (req, res) => {
   try {
-    const dates = await Scan.distinct('date');
+    const filter = getAdminFilter(req.user, req.userId);
+    const dates = await Scan.distinct('date', filter);
     res.json(dates);
   } catch (error) {
     console.error('Get dates error:', error);
@@ -45,7 +54,8 @@ router.get('/dates', auth, async (req, res) => {
 // GET /api/scans/duplicates/:moduleId — Check if a module ID is duplicated
 router.get('/duplicates/:moduleId', auth, async (req, res) => {
   try {
-    const count = await Scan.countDocuments({ moduleId: req.params.moduleId });
+    const filter = { ...getAdminFilter(req.user, req.userId), moduleId: req.params.moduleId };
+    const count = await Scan.countDocuments(filter);
     res.json({ isDuplicate: count > 1 });
   } catch (error) {
     console.error('Duplicate check error:', error);
@@ -56,7 +66,8 @@ router.get('/duplicates/:moduleId', auth, async (req, res) => {
 // GET /api/scans/exists/:moduleId — Check if a module ID already exists in the database
 router.get('/exists/:moduleId', auth, async (req, res) => {
   try {
-    const count = await Scan.countDocuments({ moduleId: req.params.moduleId });
+    const filter = { ...getAdminFilter(req.user, req.userId), moduleId: req.params.moduleId };
+    const count = await Scan.countDocuments(filter);
     res.json({ exists: count > 0 });
   } catch (error) {
     console.error('Exists check error:', error);
@@ -83,6 +94,7 @@ router.post('/', auth, async (req, res) => {
       reason: reason || '',
       savedBy: req.user.username,
       savedByUserId: req.userId,
+      adminId: req.user.role === 'user' ? req.user.createdBy : req.userId,
     });
 
     await scan.save();
@@ -96,10 +108,17 @@ router.post('/', auth, async (req, res) => {
 // DELETE /api/scans/:id — Admin only: delete a scan record
 router.delete('/:id', auth, isAdmin, async (req, res) => {
   try {
-    const scan = await Scan.findByIdAndDelete(req.params.id);
+    const scan = await Scan.findById(req.params.id);
     if (!scan) {
       return res.status(404).json({ message: 'Scan record not found.' });
     }
+
+    // Admins can only delete scans in their own group
+    if (req.user.role === 'admin' && scan.adminId && scan.adminId.toString() !== req.userId.toString()) {
+      return res.status(403).json({ message: 'Access denied. You can only delete scans in your group.' });
+    }
+
+    await Scan.findByIdAndDelete(req.params.id);
     res.json({ message: 'Scan record deleted successfully.' });
   } catch (error) {
     console.error('Delete scan error:', error);

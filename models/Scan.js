@@ -38,6 +38,11 @@ const scanSchema = new mongoose.Schema({
     ref: 'User',
     required: true,
   },
+  adminId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    default: null,
+  },
 }, { timestamps: true });
 
 module.exports = mongoose.model('Scan', scanSchema);

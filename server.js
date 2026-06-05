@@ -24,7 +24,7 @@ app.get('/', (req, res) => {
   res.json({ message: 'Premier Module Scanner API is running.' });
 });
 
-// Seed default admin account
+// Seed default super_admin account
 async function seedAdmin() {
   try {
     const adminExists = await User.findOne({ username: 'admin' });
@@ -32,12 +32,16 @@ async function seedAdmin() {
       const admin = new User({
         username: 'admin',
         password: 'admin123',
-        role: 'admin',
+        role: 'super_admin',
       });
       await admin.save();
-      console.log('✅ Default admin account created (username: admin, password: admin123)');
+      console.log('✅ Default super_admin account created (username: admin, password: admin123)');
+    } else if (adminExists.role !== 'super_admin') {
+      adminExists.role = 'super_admin';
+      await adminExists.save();
+      console.log('✅ Existing admin account promoted to super_admin');
     } else {
-      console.log('ℹ️  Admin account already exists.');
+      console.log('ℹ️  super_admin account already exists.');
     }
   } catch (error) {
     console.error('Error seeding admin:', error);

@@ -58,10 +58,16 @@ router.post('/register', auth, isAdmin, async (req, res) => {
       return res.status(400).json({ message: 'Username already exists.' });
     }
 
+    let finalRole = 'user';
+    if (req.user.role === 'super_admin' && role === 'admin') {
+      finalRole = 'admin';
+    }
+
     const newUser = new User({
       username: username.toLowerCase().trim(),
       password,
-      role: role || 'user',
+      role: finalRole,
+      createdBy: req.userId,
     });
 
     await newUser.save();

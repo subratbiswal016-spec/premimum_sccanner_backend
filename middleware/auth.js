@@ -25,12 +25,20 @@ const auth = async (req, res, next) => {
   }
 };
 
-// Check if user is admin
+// Check if user is admin or super_admin
 const isAdmin = (req, res, next) => {
-  if (req.user.role !== 'admin') {
+  if (req.user.role !== 'admin' && req.user.role !== 'super_admin') {
     return res.status(403).json({ message: 'Access denied. Admin privileges required.' });
   }
   next();
 };
 
-module.exports = { auth, isAdmin };
+// Check if user is exactly super_admin
+const isSuperAdmin = (req, res, next) => {
+  if (req.user.role !== 'super_admin') {
+    return res.status(403).json({ message: 'Access denied. Super Admin privileges required.' });
+  }
+  next();
+};
+
+module.exports = { auth, isAdmin, isSuperAdmin };
