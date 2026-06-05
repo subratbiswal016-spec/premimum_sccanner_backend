@@ -63,11 +63,16 @@ router.post('/register', auth, isAdmin, async (req, res) => {
       finalRole = 'admin';
     }
 
+    let finalCreatedBy = req.userId;
+    if (req.user.role === 'super_admin' && req.body.createdBy) {
+      finalCreatedBy = req.body.createdBy;
+    }
+
     const newUser = new User({
       username: username.toLowerCase().trim(),
       password,
       role: finalRole,
-      createdBy: req.userId,
+      createdBy: finalCreatedBy,
     });
 
     await newUser.save();
