@@ -80,4 +80,14 @@ router.post('/register', auth, isAdmin, async (req, res) => {
   }
 });
 
+// POST /api/auth/logout
+router.post('/logout', auth, async (req, res) => {
+  try {
+    res.json({ message: 'Logged out successfully.' });
+  } catch (error) {
+    console.error('Logout error:', error);
+    res.status(500).json({ message: 'Server error during logout.' });
+  }
+});
+
 module.exports = router;

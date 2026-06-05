@@ -5,6 +5,10 @@ const scanSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  time: {
+    type: String,
+    default: '',
+  },
   moduleId: {
     type: String,
     required: true,

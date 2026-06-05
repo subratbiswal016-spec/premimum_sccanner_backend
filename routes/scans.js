@@ -67,7 +67,7 @@ router.get('/exists/:moduleId', auth, async (req, res) => {
 // POST /api/scans — Create a new scan record
 router.post('/', auth, async (req, res) => {
   try {
-    const { date, moduleId, jobCard, station, operatorName, reason } = req.body;
+    const { date, time, moduleId, jobCard, station, operatorName, reason } = req.body;
 
     if (!date || !moduleId || !jobCard || !station || !operatorName) {
       return res.status(400).json({ message: 'All fields are required.' });
@@ -75,6 +75,7 @@ router.post('/', auth, async (req, res) => {
 
     const scan = new Scan({
       date,
+      time: time || '',
       moduleId,
       jobCard,
       station,

@@ -2,6 +2,17 @@
   "name": "premimums-solar-scanner-backend",
   "version": "1.0.0",
   "description": "Backend API for Premier Module Scanner",
+  "homepage": "https://github.com/subratbiswal016-spec/premimum_sccanner_backend#readme",
+  "bugs": {
+    "url": "https://github.com/subratbiswal016-spec/premimum_sccanner_backend/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/subratbiswal016-spec/premimum_sccanner_backend.git"
+  },
+  "license": "ISC",
+  "author": "",
+  "type": "commonjs",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
@@ -10,7 +21,7 @@
   "dependencies": {
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
-    "dotenv": "^16.4.5",
+    "dotenv": "^16.6.1",
     "express": "^4.21.0",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.7.0"
