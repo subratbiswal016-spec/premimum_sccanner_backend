@@ -49,6 +49,11 @@ router.delete('/:id', auth, isAdmin, async (req, res) => {
       return res.status(403).json({ message: 'Cannot delete a super admin account.' });
     }
 
+    // Cascade delete: if the user being deleted is an admin, delete all users they created
+    if (userToDelete.role === 'admin') {
+      await User.deleteMany({ createdBy: req.params.id });
+    }
+
     await User.findByIdAndDelete(req.params.id);
     res.json({ message: 'User deleted successfully.' });
   } catch (error) {
